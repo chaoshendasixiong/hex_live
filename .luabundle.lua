@@ -1,0 +1,2 @@
+rocks_trees = { { root = "/root/gitcheck/hex_live/bundle", bin_dir = "/root/gitcheck/hex_live/bundle/bin", lib_dir = "/root/gitcheck/hex_live/bundle/lib/lua", lua_dir = "/root/gitcheck/hex_live/bundle/share/lua" } }
+variables = { CFLAGS = "-O2 -fPIC -I/root/gitcheck/hex_live/skynet/3rd/lua -I/usr/local/include", LIBFLAG = "-shared -L/root/gitcheck/hex_live/skynet/3rd/lua -L/usr/local/lib", LUA = "/root/gitcheck/hex_live/skynet/3rd/lua/lua", LUA_BINDIR = "/root/gitcheck/hex_live/skynet/3rd/lua" }
