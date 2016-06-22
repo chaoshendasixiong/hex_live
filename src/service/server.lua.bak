@@ -1,0 +1,85 @@
+local skynet = require "skynet"
+local skynetmgr = require "skynet.manager"
+local netpack   = require "netpack"
+local socket 	= require "socket"
+
+
+local gate
+local CMD = {}
+local SOCKET = {}
+local auth = {}
+
+
+local hall--replace this as watchdog
+
+function CMD.xxx()
+	skynet.error("server rec xxx")
+end
+
+function SOCKET.open(fd, addr)
+	skynet.call(gate, "lua", "accept", fd)
+	skynet.error("client"..fd, "connected: ", addr)
+	socket.write(fd, "nihao")
+	local data = {}
+	data.hall = hall
+	auth[fd] = data
+end
+
+function SOCKET.close(fd)
+	skynet.error("client"..fd, "disconnected")
+end
+--if auth[fd].hall skynet.send hall  
+function SOCKET.error(fd, msg)
+	skynet.error("client"..fd, "disconnected: ", msg)
+end
+
+function SOCKET.data(fd, msg)
+	skynet.error("client"..fd, "says: ", msg)
+	socket.write(fd, msg)
+--[[
+	local c = auth[fd]
+	local ha = c.hall
+	if ha then
+		skynet.redirect(ha, fd, )
+	end
+]]
+end
+
+function create_hall()
+	hall = skynet.uniqueservice("hall")
+	
+	skynet.call(hall, "lua", "set_gate", gate)
+end
+
+skynet.start(function()
+	skynetmgr.register("SERVER")
+	skynet.dispatch("lua", function(session, source, cmd, subcmd,...)
+	skynet.error("-------", session, source, cmd, subcmd)
+	if cmd == "socket" then
+		local f = SOCKET[subcmd]
+		if f then
+			f(...)
+		else
+			skynet.error("unknow socket command: ", subcmd)
+		end
+	else
+		local f = assert(CMD[cmd])
+		skynet.ret(skynet.pack(f(subcmd, ...)))
+	end
+	end)
+	local skynetmanager = require "skynet.manager"
+
+	gate = assert(skynetmanager.uniqueservice("gate"))
+	local tab = {
+		address = "192.168.111.128",
+		port = 9999,
+		maxclient = 1024,
+		nodelay = true,
+		--watchdog = hall,
+	}
+	
+	skynet.call(gate, "lua", "open", tab)
+	create_hall()
+	
+end
+)
